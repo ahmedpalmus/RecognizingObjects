@@ -9,11 +9,15 @@ android:gravity="center_horizontal"
     tools:context=".UserPage">
 
     <ImageView
+        android:id="@+id/image_view"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="300dp"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+        android:layout_margin="16dp"
         android:src="@drawable/kidimage"/>
     <ImageButton
-        android:id="@+id/reg_cancel"
+        android:id="@+id/start_camera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="50dp"

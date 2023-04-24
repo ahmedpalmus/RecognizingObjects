@@ -4,16 +4,19 @@ plugins {
 
 android {
     namespace 'com.example.recognizingobjects'
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.example.recognizingobjects"
-        minSdk 21
+        minSdk 24
         targetSdk 32
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    configurations {
+        all*.exclude group: 'org.tensorflow', module: 'tensorflow-lite-api'
     }
 
     buildTypes {
@@ -36,4 +39,7 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation 'org.tensorflow:tensorflow-lite:2.5.0'
+    implementation 'org.tensorflow:tensorflow-lite-task-vision-play-services:0.4.2'
+
 }
