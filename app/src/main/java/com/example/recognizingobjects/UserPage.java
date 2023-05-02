@@ -57,12 +57,12 @@ public class UserPage extends AppCompatActivity {
             Bundle extras = data.getExtras();
             imageBitmap = (Bitmap) extras.get("data");
             imageView.setImageBitmap(imageBitmap);
-            try {
+           /* try {
                 detector=new YOLOv5Detector(this.getApplicationContext(),imageBitmap);
                 System.out.println(detector.detectObjects(imageBitmap).toArray().toString());
             } catch (IOException e) {
                 e.printStackTrace();
-            }
+            }*/
         }
     }
     @Override

@@ -94,9 +94,13 @@ public class YOLOv5Detector {
         final float[][] outputNumDetections = new float[1][1];
         Map<Integer, Object> outputMap = new HashMap<>();
         Object[] inputArray = {inputTensorBuffer};
+        System.out.println("here");
+
         interpreter.runForMultipleInputsOutputs(inputArray, outputMap);
+        System.out.println("here2");
 
         System.out.println(outputMap.toString());
+        System.out.println("here3");
 
         // Postprocess output
         final List<Recognition> detections = new ArrayList<>();
