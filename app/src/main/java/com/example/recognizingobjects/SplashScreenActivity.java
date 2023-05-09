@@ -18,8 +18,8 @@ public class SplashScreenActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent intent = new Intent(SplashScreenActivity.this,  MainActivity.class);
-                startActivity(intent);
+                Intent x = new Intent(SplashScreenActivity.this,  MainActivity.class);
+                startActivity(x);
                 finish();
             }
         }, SPLASH_SCREEN_TIMEOUT);

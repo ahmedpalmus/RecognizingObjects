@@ -7,7 +7,20 @@
 android:gravity="center_horizontal"
     android:orientation="vertical"
     tools:context=".UserPage">
-
+    <Button
+        android:id="@+id/exit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/logout"
+        android:background="@drawable/box_2"
+        android:padding="5dp"
+        android:textAllCaps="false"
+        android:text="Logout"
+        android:textColor="#303F9F"
+        android:layout_marginBottom="10dp"
+        android:layout_gravity="end"
+        android:layout_margin="5dp"
+        android:textSize="18dp" />
     <ImageView
         android:id="@+id/image_view"
         android:layout_width="wrap_content"

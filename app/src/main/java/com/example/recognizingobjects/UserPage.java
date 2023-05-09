@@ -44,6 +44,7 @@ public class UserPage extends AppCompatActivity {
     private Matrix cropToFrameTransform;
     private Bitmap sourceBitmap;
     private Bitmap cropBitmap;
+    Button logout;
 TextView res;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +58,17 @@ TextView res;
         imageView = findViewById(R.id.image_view);
         start_camera = findViewById(R.id.start_camera);
         detectButton = findViewById(R.id.start_detect);
+        logout=findViewById(R.id.exit);
+
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent x = new Intent(UserPage.this,  MainActivity.class);
+                startActivity(x);
+                finish();
+            }
+        });
+
         res = findViewById(R.id.detected);
         start_camera.setOnClickListener(new View.OnClickListener() {
             @Override
