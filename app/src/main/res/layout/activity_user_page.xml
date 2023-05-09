@@ -16,15 +16,41 @@ android:gravity="center_horizontal"
         android:scaleType="centerCrop"
         android:layout_margin="16dp"
         android:src="@drawable/kidimage"/>
-    <ImageButton
+    <Button
         android:id="@+id/start_camera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="50dp"
-        android:src="@drawable/scan"
-        android:background="@drawable/box_1"
+        android:drawableLeft="@drawable/ic_baseline_image_search_24"
+        android:background="@drawable/box_2"
         android:padding="20dp"
         android:textAllCaps="false"
-        android:textColor="#fff"
-        android:textSize="18dp" />
+        android:text="Scan Image"
+        android:textColor="#303F9F"
+        android:layout_marginBottom="10dp"
+        android:textSize="20dp" />
+    <Button
+        android:id="@+id/start_detect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="50dp"
+        android:drawableLeft="@drawable/ic_baseline_youtube_searched_for_24"
+        android:background="@drawable/box_2"
+        android:padding="20dp"
+        android:textAllCaps="false"
+        android:textColor="#B81065"
+        android:text="Detect"
+        android:textSize="20dp" />
+
+    <TextView
+        android:id="@+id/detected"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/gradient_light"
+        android:padding="20dp"
+        android:layout_margin="10dp"
+        android:text="Result:"
+        android:textSize="18sp"
+
+    />
 </LinearLayout>
