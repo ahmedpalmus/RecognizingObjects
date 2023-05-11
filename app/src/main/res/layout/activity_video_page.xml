@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    tools:context=".VideoPage">
+    <Button
+        android:id="@+id/exit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/logout"
+        android:background="@drawable/box_2"
+        android:padding="5dp"
+        android:textAllCaps="false"
+        android:text="Logout"
+        android:textColor="#303F9F"
+        android:layout_marginBottom="10dp"
+        android:layout_gravity="end"
+        android:layout_margin="5dp"
+        android:textSize="18dp" />
+    <VideoView
+        android:id="@+id/vid_view"
+        android:layout_width="wrap_content"
+        android:layout_height="300dp"
+        android:layout_margin="16dp"/>
+
+    <ImageButton
+        android:id="@+id/play"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_baseline_play_circle_filled_24"
+        android:background="@drawable/box_2"
+        android:padding="10dp"
+        android:layout_marginHorizontal="10dp"
+        android:textAllCaps="false"
+        android:textColor="#303F9F"
+        android:textSize="20dp" />
+</LinearLayout>

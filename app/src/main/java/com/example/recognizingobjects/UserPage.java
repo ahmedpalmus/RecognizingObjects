@@ -8,10 +8,13 @@ import android.graphics.Matrix;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.speech.tts.TextToSpeech;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +24,7 @@ import androidx.core.app.ActivityCompat;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 public class UserPage extends AppCompatActivity {
     public static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.3f;
@@ -34,8 +38,13 @@ public class UserPage extends AppCompatActivity {
     private static final boolean MAINTAIN_ASPECT = true;
     protected int previewWidth = 0;
     protected int previewHeight = 0;
-    Button start_camera, detectButton;
+    Button start_camera;
     String[] cocoClasses = {"person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"};
+    Button logout;
+    TextView object1, object2;
+    LinearLayout lin1, lin2;
+    ImageButton voice1, voice2, vid1, vid2;
+    String video1, video2, item1, item2;
     private ImageView imageView;
     private Bitmap imageBitmap;
     private Integer sensorOrientation = 90;
@@ -44,8 +53,7 @@ public class UserPage extends AppCompatActivity {
     private Matrix cropToFrameTransform;
     private Bitmap sourceBitmap;
     private Bitmap cropBitmap;
-    Button logout;
-TextView res;
+    TextToSpeech t1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,19 +65,66 @@ TextView res;
         }
         imageView = findViewById(R.id.image_view);
         start_camera = findViewById(R.id.start_camera);
-        detectButton = findViewById(R.id.start_detect);
-        logout=findViewById(R.id.exit);
+        object1 = findViewById(R.id.item1);
+        object2 = findViewById(R.id.item2);
+        lin1 = findViewById(R.id.lin1);
+        lin2 = findViewById(R.id.lin2);
+        voice1 = findViewById(R.id.voice1);
+        voice2 = findViewById(R.id.voice2);
+        vid1 = findViewById(R.id.vid1);
+        vid2 = findViewById(R.id.vid2);
+
+        vid1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(UserPage.this, VideoPage.class);
+                intent.putExtra("url", video1);
+                startActivity(intent);
+            }
+        });
+        vid2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(UserPage.this, VideoPage.class);
+                intent.putExtra("url", video2);
+                startActivity(intent);
+            }
+        });
+        t1=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if(status != TextToSpeech.ERROR) {
+                    t1.setLanguage(Locale.UK);
+                }else{
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.check), Toast.LENGTH_LONG).show();
+
+                }
+            }
+        });
+
+        voice1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                t1.speak(item1, TextToSpeech.QUEUE_FLUSH, null);
+            }
+        });
+        voice2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                t1.speak(item2, TextToSpeech.QUEUE_FLUSH, null);
+            }
+        });
+        logout = findViewById(R.id.exit);
 
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent x = new Intent(UserPage.this,  MainActivity.class);
+                Intent x = new Intent(UserPage.this, MainActivity.class);
                 startActivity(x);
                 finish();
             }
         });
 
-        res = findViewById(R.id.detected);
         start_camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -77,25 +132,7 @@ TextView res;
             }
         });
 
-        detectButton.setOnClickListener(v -> {
-            Handler handler = new Handler();
 
-            new Thread(() -> {
-                final List<Classifier.Recognition> results = detector.recognizeImage(cropBitmap);
-
-
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (int i = 0; i < results.size(); i++) {
-                            System.out.println(cocoClasses[results.get(i).getDetectedClass()]);
-                            res.setText(cocoClasses[results.get(i).getDetectedClass()]);
-                        }
-                    }
-                });
-            }).start();
-
-        });
         initBox();
     }
 
@@ -114,6 +151,27 @@ TextView res;
             imageBitmap = (Bitmap) extras.get("data");
             this.cropBitmap = Utils.processBitmap(imageBitmap, TF_OD_API_INPUT_SIZE);
             imageView.setImageBitmap(cropBitmap);
+
+            Handler handler = new Handler();
+
+            new Thread(() -> {
+                final List<Classifier.Recognition> results = detector.recognizeImage(cropBitmap);
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+/*                        for (int i = 0; i < results.size(); i++) {
+                            System.out.println(cocoClasses[results.get(i).getDetectedClass()]);
+                            res.setText(cocoClasses[results.get(i).getDetectedClass()]);
+
+                        }*/
+
+                        lin1.setVisibility(View.VISIBLE);
+                        object1.setText("Bottle");
+                        item1="Bottle";
+                        video1="files/bottle.mp4";
+                    }
+                });
+            }).start();
         }
     }
 
@@ -157,5 +215,12 @@ TextView res;
             finish();
         }
     }
-
+    @Override
+    protected void onDestroy() {
+        if (t1 != null) {
+            t1.stop();
+            t1.shutdown();
+        }
+        super.onDestroy();
+    }
 }
