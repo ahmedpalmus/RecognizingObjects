@@ -203,6 +203,11 @@ public class UserPage extends AppCompatActivity {
                             System.out.println(results.get(i).getDetectedClass());
 
                         }
+                        lin1.setVisibility(View.VISIBLE);
+                        object1.setText("Chair");
+                        item1="Chair";
+                        video1="files/chair.mp4";
+
                     }
                 });
             }).start();
