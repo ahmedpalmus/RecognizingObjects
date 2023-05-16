@@ -4,8 +4,11 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.speech.tts.TextToSpeech;
@@ -21,8 +24,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 
+import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -54,6 +61,7 @@ public class UserPage extends AppCompatActivity {
     private Bitmap sourceBitmap;
     private Bitmap cropBitmap;
     TextToSpeech t1;
+    String currentPhotoPath="";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -138,20 +146,49 @@ public class UserPage extends AppCompatActivity {
 
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+        /*if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }*/
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create a file to store the image
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Handle file creation error
+            }
+
+            // Continue only if the file was successfully created
+            if (photoFile != null) {
+                Uri photoUri = FileProvider.getUriForFile(this, "com.example.recognizingobjects.fileprovider", photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
         }
     }
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File imageFile = File.createTempFile(imageFileName, ".jpg", storageDir);
 
+        // Save a file path for use with ACTION_IMAGE_CAPTURE intent
+        currentPhotoPath = imageFile.getAbsolutePath();
+        return imageFile;
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
+/*            Bundle extras = data.getExtras();
             imageBitmap = (Bitmap) extras.get("data");
-            this.cropBitmap = Utils.processBitmap(imageBitmap, TF_OD_API_INPUT_SIZE);
-            imageView.setImageBitmap(cropBitmap);
 
+            imageView.setImageBitmap(cropBitmap);*/
+            Bitmap capturedBitmap = loadImageFromFile(currentPhotoPath);
+            this.cropBitmap = Utils.processBitmap(capturedBitmap, TF_OD_API_INPUT_SIZE);
+            imageView.setImageURI(Uri.fromFile(new File(currentPhotoPath)));
+            start_camera.setEnabled(false);
             Handler handler = new Handler();
 
             new Thread(() -> {
@@ -159,20 +196,23 @@ public class UserPage extends AppCompatActivity {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-/*                        for (int i = 0; i < results.size(); i++) {
+                    for (int i = 0; i < results.size(); i++) {
                             System.out.println(cocoClasses[results.get(i).getDetectedClass()]);
-                            res.setText(cocoClasses[results.get(i).getDetectedClass()]);
 
-                        }*/
+                            //res.setText(cocoClasses[results.get(i).getDetectedClass()]);
+                            System.out.println(results.get(i).getDetectedClass());
 
-                        lin1.setVisibility(View.VISIBLE);
-                        object1.setText("Bottle");
-                        item1="Bottle";
-                        video1="files/bottle.mp4";
+                        }
                     }
                 });
             }).start();
         }
+    }
+    private Bitmap loadImageFromFile(String filePath) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888; // Set the bitmap configuration
+
+        return BitmapFactory.decodeFile(filePath, options);
     }
 
     @Override

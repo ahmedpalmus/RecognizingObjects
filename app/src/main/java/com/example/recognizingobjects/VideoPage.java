@@ -38,7 +38,7 @@ ImageButton play;
         mediaController.setAnchorView(videoView);
         videoView.setMediaController(mediaController);
         videoView.setVideoURI(Uri.parse("android.resource://" + getPackageName() + "/" +
-                R.raw.bottle));
+                R.raw.chair));
     }
 
     @Override

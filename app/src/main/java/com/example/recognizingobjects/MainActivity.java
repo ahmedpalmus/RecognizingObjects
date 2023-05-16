@@ -16,7 +16,6 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity {
     EditText user, password;
     String username, pass;
-
     String URL = Server.ip + "login.php";
 
     @Override

@@ -37,7 +37,6 @@ public class Register extends AppCompatActivity {
 
         email = findViewById(R.id.reg_email);
 
-
         l1 = findViewById(R.id.l1);
         l2 = findViewById(R.id.l2);
         l3 = findViewById(R.id.l3);
