@@ -68,14 +68,8 @@ public class YoloV5Classifier implements Classifier {
      */
     private final Interpreter.Options tfliteOptions = new Interpreter.Options();
     protected float mNmsThresh = 0.6f;
-    /**
-     * holds a gpu delegate
-     */
-    GpuDelegate gpuDelegate = null;
-    /**
-     * holds an nnapi delegate
-     */
-    NnApiDelegate nnapiDelegate = null;
+
+
     //config yolo
     private int INPUT_SIZE = -1;
     //    private int[] OUTPUT_WIDTH;
@@ -135,26 +129,6 @@ public class YoloV5Classifier implements Classifier {
         try {
             Interpreter.Options options = (new Interpreter.Options());
             options.setNumThreads(NUM_THREADS);
-            if (isNNAPI) {
-                d.nnapiDelegate = null;
-                // Initialize interpreter with NNAPI delegate for Android Pie or above
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    d.nnapiDelegate = new NnApiDelegate();
-                    options.addDelegate(d.nnapiDelegate);
-                    options.setNumThreads(NUM_THREADS);
-//                    options.setUseNNAPI(false);
-//                    options.setAllowFp16PrecisionForFp32(true);
-//                    options.setAllowBufferHandleOutput(true);
-                    options.setUseNNAPI(true);
-                }
-            }
-            if (isGPU) {
-                GpuDelegate.Options gpu_options = new GpuDelegate.Options();
-                gpu_options.setPrecisionLossAllowed(true); // It seems that the default is true
-                gpu_options.setInferencePreference(GpuDelegate.Options.INFERENCE_PREFERENCE_SUSTAINED_SPEED);
-                d.gpuDelegate = new GpuDelegate(gpu_options);
-                options.addDelegate(d.gpuDelegate);
-            }
             d.tfliteModel = Utils.loadModelFile(assetManager, modelFilename);
             d.tfLite = new Interpreter(d.tfliteModel, options);
         } catch (Exception e) {
@@ -164,11 +138,9 @@ public class YoloV5Classifier implements Classifier {
         d.isModelQuantized = isQuantized;
         // Pre-allocate buffers.
         int numBytesPerChannel;
-        if (isQuantized) {
-            numBytesPerChannel = 1; // Quantized
-        } else {
+
             numBytesPerChannel = 4; // Floating point
-        }
+
         d.INPUT_SIZE = inputSize;
         d.imgData = ByteBuffer.allocateDirect(1 * d.INPUT_SIZE * d.INPUT_SIZE * 3 * numBytesPerChannel);
         d.imgData.order(ByteOrder.nativeOrder());
@@ -212,14 +184,6 @@ public class YoloV5Classifier implements Classifier {
     public void close() {
         tfLite.close();
         tfLite = null;
-        if (gpuDelegate != null) {
-            gpuDelegate.close();
-            gpuDelegate = null;
-        }
-        if (nnapiDelegate != null) {
-            nnapiDelegate.close();
-            nnapiDelegate = null;
-        }
         tfliteModel = null;
     }
 
@@ -239,21 +203,9 @@ public class YoloV5Classifier implements Classifier {
         }
     }
 
-    public void useGpu() {
-        if (gpuDelegate == null) {
-            gpuDelegate = new GpuDelegate();
-            tfliteOptions.addDelegate(gpuDelegate);
-            recreateInterpreter();
-        }
-    }
+
 
     public void useCPU() {
-        recreateInterpreter();
-    }
-
-    public void useNNAPI() {
-        nnapiDelegate = new NnApiDelegate();
-        tfliteOptions.addDelegate(nnapiDelegate);
         recreateInterpreter();
     }
 

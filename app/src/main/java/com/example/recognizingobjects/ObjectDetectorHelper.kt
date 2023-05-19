@@ -37,10 +37,11 @@ class ObjectDetectorHelper(
         val objectDetectorListener: DetectorListener?
 ) {
 
+
     // For this example this needs to be a var so it can be reset on changes. If the ObjectDetector
     // will not change, a lazy val would be preferable.
     private var objectDetector: ObjectDetector? = null
-
+   public lateinit var results: List<Detection>  ;
     init {
         setupObjectDetector()
     }
@@ -63,34 +64,9 @@ class ObjectDetectorHelper(
         // Set general detection options, including number of used threads
         val baseOptionsBuilder = BaseOptions.builder().setNumThreads(numThreads)
 
-        // Use the specified hardware for running the model. Default to CPU
-        when (currentDelegate) {
-            DELEGATE_CPU -> {
-                // Default
-            }
-            DELEGATE_GPU -> {
-                if (CompatibilityList().isDelegateSupportedOnThisDevice) {
-                    baseOptionsBuilder.useGpu()
-                } else {
-                    objectDetectorListener?.onError("GPU is not supported on this device")
-                }
-            }
-            DELEGATE_NNAPI -> {
-                baseOptionsBuilder.useNnapi()
-            }
-        }
-
         optionsBuilder.setBaseOptions(baseOptionsBuilder.build())
 
-        val modelName =
-                when (currentModel) {
-                    MODEL_MOBILENETV1 -> "mobilenetv1.tflite"
-                    MODEL_EFFICIENTDETV0 -> "efficientdet-lite0.tflite"
-                    MODEL_EFFICIENTDETV1 -> "efficientdet-lite1.tflite"
-                    MODEL_EFFICIENTDETV2 -> "efficientdet-lite2.tflite"
-                    else -> "mobilenetv1.tflite"
-                }
-
+        val modelName ="mobilenetv1.tflite"
         try {
             objectDetector =
                     ObjectDetector.createFromFileAndOptions(context, modelName, optionsBuilder.build())
@@ -122,13 +98,8 @@ class ObjectDetectorHelper(
         // Preprocess the image and convert it into a TensorImage for detection.
         val tensorImage = imageProcessor.process(TensorImage.fromBitmap(image))
 
-        val results = objectDetector?.detect(tensorImage)
-        inferenceTime = SystemClock.uptimeMillis() - inferenceTime
-        objectDetectorListener?.onResults(
-                results,
-                inferenceTime,
-                tensorImage.height,
-                tensorImage.width)
+        results = objectDetector?.detect(tensorImage) as List<Detection>
+
     }
 
     interface DetectorListener {

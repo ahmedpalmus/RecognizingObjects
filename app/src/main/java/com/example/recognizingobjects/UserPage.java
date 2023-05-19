@@ -12,7 +12,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.speech.tts.TextToSpeech;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -22,9 +21,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
+
+import org.tensorflow.lite.task.vision.detector.Detection;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,19 +34,23 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-public class UserPage extends AppCompatActivity {
+import com.example.recognizingobjects.ObjectDetectorHelper;
+import com.example.recognizingobjects.ObjectDetectorHelper.DetectorListener;
+public class UserPage extends AppCompatActivity implements DetectorListener {
     public static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.3f;
     public static final int TF_OD_API_INPUT_SIZE = 640;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_CAMERA_PERMISSION = 10;
-    private static final boolean TF_OD_API_IS_QUANTIZED = false;
-    private static final String TF_OD_API_MODEL_FILE = "model.tflite";
+    private static final boolean TF_OD_API_IS_QUANTIZED = true;
+    private static final String TF_OD_API_MODEL_FILE = "efficientdet-lite2.tflite";
     private static final String TF_OD_API_LABELS_FILE = "coco.txt";
     // Minimum detection confidence to track a detection.
     private static final boolean MAINTAIN_ASPECT = true;
     protected int previewWidth = 0;
     protected int previewHeight = 0;
+    private ObjectDetectorHelper objectDetectorHelper;
+    private ObjectDetectorHelper.DetectorListener detectorListener;
+    List<Detection> res;
     Button start_camera;
     String[] cocoClasses = {"person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"};
     Button logout;
@@ -81,6 +87,8 @@ public class UserPage extends AppCompatActivity {
         voice2 = findViewById(R.id.voice2);
         vid1 = findViewById(R.id.vid1);
         vid2 = findViewById(R.id.vid2);
+
+        objectDetectorHelper = new ObjectDetectorHelper(0.5f,2,3,0,0,getApplicationContext(),detectorListener);
 
         vid1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -189,14 +197,37 @@ public class UserPage extends AppCompatActivity {
             this.cropBitmap = Utils.processBitmap(capturedBitmap, TF_OD_API_INPUT_SIZE);
             imageView.setImageURI(Uri.fromFile(new File(currentPhotoPath)));
             start_camera.setEnabled(false);
-            Handler handler = new Handler();
+
+            objectDetectorHelper.detect(cropBitmap, 0);
+
+            res= (List<Detection>) objectDetectorHelper.results;
+            if(res.size()>0){
+            for (int i = 0; i < res.size(); i++) {
+
+                //res.setText(cocoClasses[results.get(i).getDetectedClass()]);
+                System.out.println(res.get(i).getCategories().get(0).getLabel()+" score: "+res.get(i).getCategories().get(0).getScore());
+                item1=res.get(i).getCategories().get(0).getLabel();
+                object1.setText(item1);
+
+                break;
+            }}else
+                {
+                    item1="";
+                    object1.setText(item1);
+                }
+            start_camera.setEnabled(true);
+
+           /* Handler handler = new Handler();
 
             new Thread(() -> {
-                final List<Classifier.Recognition> results = detector.recognizeImage(cropBitmap);
+
+                //final List<Classifier.Recognition> results = detector.recognizeImage(cropBitmap);
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                    for (int i = 0; i < results.size(); i++) {
+
+
+      *//*              for (int i = 0; i < results.size(); i++) {
                             System.out.println(cocoClasses[results.get(i).getDetectedClass()]);
 
                             //res.setText(cocoClasses[results.get(i).getDetectedClass()]);
@@ -204,13 +235,12 @@ public class UserPage extends AppCompatActivity {
 
                         }
                         lin1.setVisibility(View.VISIBLE);
-                        object1.setText("Chair");
-                        item1="Chair";
-                        video1="files/chair.mp4";
+
+                        video1="files/chair.mp4";*//*
 
                     }
                 });
-            }).start();
+            }).start();*/
         }
     }
     private Bitmap loadImageFromFile(String filePath) {
@@ -267,5 +297,17 @@ public class UserPage extends AppCompatActivity {
             t1.shutdown();
         }
         super.onDestroy();
+    }
+
+    @Override
+    public void onError(@NonNull String error) {
+
+    }
+
+    @Override
+    public void onResults(@Nullable List<Detection> results, long inferenceTime, int imageHeight, int imageWidth) {
+        System.out.println("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
+
+
     }
 }
