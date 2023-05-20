@@ -66,7 +66,7 @@ class ObjectDetectorHelper(
 
         optionsBuilder.setBaseOptions(baseOptionsBuilder.build())
 
-        val modelName ="mobilenetv1.tflite"
+        val modelName ="efficientdet-lite2.tflite"
         try {
             objectDetector =
                     ObjectDetector.createFromFileAndOptions(context, modelName, optionsBuilder.build())

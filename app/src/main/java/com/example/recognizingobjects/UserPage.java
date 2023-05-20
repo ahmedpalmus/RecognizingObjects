@@ -9,7 +9,6 @@ import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.speech.tts.TextToSpeech;
 import android.view.View;
@@ -26,6 +25,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
+import com.example.recognizingobjects.ObjectDetectorHelper.DetectorListener;
+
 import org.tensorflow.lite.task.vision.detector.Detection;
 
 import java.io.File;
@@ -34,8 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import com.example.recognizingobjects.ObjectDetectorHelper;
-import com.example.recognizingobjects.ObjectDetectorHelper.DetectorListener;
+
 public class UserPage extends AppCompatActivity implements DetectorListener {
     public static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.3f;
     public static final int TF_OD_API_INPUT_SIZE = 640;
@@ -48,8 +48,6 @@ public class UserPage extends AppCompatActivity implements DetectorListener {
     private static final boolean MAINTAIN_ASPECT = true;
     protected int previewWidth = 0;
     protected int previewHeight = 0;
-    private ObjectDetectorHelper objectDetectorHelper;
-    private ObjectDetectorHelper.DetectorListener detectorListener;
     List<Detection> res;
     Button start_camera;
     String[] cocoClasses = {"person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"};
@@ -58,6 +56,10 @@ public class UserPage extends AppCompatActivity implements DetectorListener {
     LinearLayout lin1, lin2;
     ImageButton voice1, voice2, vid1, vid2;
     String video1, video2, item1, item2;
+    TextToSpeech t1;
+    String currentPhotoPath = "";
+    private ObjectDetectorHelper objectDetectorHelper;
+    private ObjectDetectorHelper.DetectorListener detectorListener;
     private ImageView imageView;
     private Bitmap imageBitmap;
     private Integer sensorOrientation = 90;
@@ -66,8 +68,7 @@ public class UserPage extends AppCompatActivity implements DetectorListener {
     private Matrix cropToFrameTransform;
     private Bitmap sourceBitmap;
     private Bitmap cropBitmap;
-    TextToSpeech t1;
-    String currentPhotoPath="";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,13 +89,13 @@ public class UserPage extends AppCompatActivity implements DetectorListener {
         vid1 = findViewById(R.id.vid1);
         vid2 = findViewById(R.id.vid2);
 
-        objectDetectorHelper = new ObjectDetectorHelper(0.5f,2,3,0,0,getApplicationContext(),detectorListener);
+        objectDetectorHelper = new ObjectDetectorHelper(0.4f, 2, 2, 0, 0, getApplicationContext(), detectorListener);
 
         vid1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(UserPage.this, VideoPage.class);
-                intent.putExtra("url", video1);
+                intent.putExtra("url", item1.toLowerCase(Locale.ROOT));
                 startActivity(intent);
             }
         });
@@ -102,16 +103,16 @@ public class UserPage extends AppCompatActivity implements DetectorListener {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(UserPage.this, VideoPage.class);
-                intent.putExtra("url", video2);
+                intent.putExtra("url", item2.toLowerCase(Locale.ROOT));
                 startActivity(intent);
             }
         });
-        t1=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+        t1 = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
-                if(status != TextToSpeech.ERROR) {
+                if (status != TextToSpeech.ERROR) {
                     t1.setLanguage(Locale.UK);
-                }else{
+                } else {
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.check), Toast.LENGTH_LONG).show();
 
                 }
@@ -174,6 +175,7 @@ public class UserPage extends AppCompatActivity implements DetectorListener {
             }
         }
     }
+
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
@@ -185,6 +187,7 @@ public class UserPage extends AppCompatActivity implements DetectorListener {
         currentPhotoPath = imageFile.getAbsolutePath();
         return imageFile;
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -200,21 +203,25 @@ public class UserPage extends AppCompatActivity implements DetectorListener {
 
             objectDetectorHelper.detect(cropBitmap, 0);
 
-            res= (List<Detection>) objectDetectorHelper.results;
-            if(res.size()>0){
-            for (int i = 0; i < res.size(); i++) {
-
-                //res.setText(cocoClasses[results.get(i).getDetectedClass()]);
-                System.out.println(res.get(i).getCategories().get(0).getLabel()+" score: "+res.get(i).getCategories().get(0).getScore());
-                item1=res.get(i).getCategories().get(0).getLabel();
-                object1.setText(item1);
-
-                break;
-            }}else
-                {
-                    item1="";
+            res = (List<Detection>) objectDetectorHelper.results;
+            if (res.size() > 0) {
+                if (res.size() == 1) {
+                    item1 = res.get(0).getCategories().get(0).getLabel();
                     object1.setText(item1);
+                    lin1.setVisibility(View.VISIBLE);
+
+                } else if (res.size() == 2) {
+                    item1 = res.get(0).getCategories().get(0).getLabel();
+                    object1.setText(item1);
+                    lin1.setVisibility(View.VISIBLE);
+                    item2 = res.get(1).getCategories().get(0).getLabel();
+                    object2.setText(item1);
+                    lin2.setVisibility(View.VISIBLE);
                 }
+            } else {
+                lin1.setVisibility(View.GONE);
+                Toast.makeText(UserPage.this, "Try a gain with a new Image", Toast.LENGTH_LONG).show();
+            }
             start_camera.setEnabled(true);
 
            /* Handler handler = new Handler();
@@ -243,6 +250,7 @@ public class UserPage extends AppCompatActivity implements DetectorListener {
             }).start();*/
         }
     }
+
     private Bitmap loadImageFromFile(String filePath) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888; // Set the bitmap configuration
@@ -290,6 +298,7 @@ public class UserPage extends AppCompatActivity implements DetectorListener {
             finish();
         }
     }
+
     @Override
     protected void onDestroy() {
         if (t1 != null) {

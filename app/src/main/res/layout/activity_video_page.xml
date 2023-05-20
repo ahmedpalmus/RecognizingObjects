@@ -21,23 +21,9 @@
         android:layout_gravity="end"
         android:layout_margin="5dp"
         android:textSize="18dp" />
-    <VideoView
+    <WebView
         android:id="@+id/vid_view"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_weight="8"
-        android:layout_margin="16dp"/>
-
-    <ImageButton
-        android:id="@+id/play"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:src="@drawable/ic_baseline_play_circle_filled_24"
-        android:background="@drawable/box_2"
-        android:padding="10dp"
-        android:layout_marginHorizontal="10dp"
-        android:textAllCaps="false"
-        android:textColor="#303F9F"
-        android:textSize="20dp" />
+        android:layout_height="300dp"
+        />
 </LinearLayout>
