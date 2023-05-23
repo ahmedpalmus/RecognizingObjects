@@ -65,7 +65,6 @@ getInfos();
                 Connection con = new Connection();
                 HashMap<String, String> data = new HashMap<>();
                 data.put("term", term);
-
                 String result = con.sendPostRequest(URL, data);
                 return result.trim();
             }
