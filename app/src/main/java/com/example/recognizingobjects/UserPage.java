@@ -224,6 +224,7 @@ public class UserPage extends AppCompatActivity implements DetectorListener {
                 }
             } else {
                 lin1.setVisibility(View.GONE);
+                lin2.setVisibility(View.GONE);
                 Toast.makeText(UserPage.this, "Try a gain with a new Image", Toast.LENGTH_LONG).show();
             }
             start_camera.setEnabled(true);
