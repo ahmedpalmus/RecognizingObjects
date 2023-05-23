@@ -216,7 +216,7 @@ public class UserPage extends AppCompatActivity implements DetectorListener {
                     lin1.setVisibility(View.VISIBLE);
                     item2 = res.get(1).getCategories().get(0).getLabel();
                     if(!item1.equals(item2)) {
-                        object2.setText(item1);
+                        object2.setText(item2);
                         lin2.setVisibility(View.VISIBLE);
                     }
                 }
