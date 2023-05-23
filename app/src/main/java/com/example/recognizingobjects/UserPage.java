@@ -89,7 +89,7 @@ public class UserPage extends AppCompatActivity implements DetectorListener {
         vid1 = findViewById(R.id.vid1);
         vid2 = findViewById(R.id.vid2);
 
-        objectDetectorHelper = new ObjectDetectorHelper(0.5f, 3, 2, 0, 0, getApplicationContext(), detectorListener);
+        objectDetectorHelper = new ObjectDetectorHelper(0.5f, 2, 2, 0, 0, getApplicationContext(), detectorListener);
 
         vid1.setOnClickListener(new View.OnClickListener() {
             @Override
