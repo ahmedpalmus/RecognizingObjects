@@ -49,13 +49,13 @@ public class UserPage extends AppCompatActivity implements DetectorListener {
     protected int previewWidth = 0;
     protected int previewHeight = 0;
     List<Detection> res;
-    Button start_camera;
+    ImageButton start_camera;
     String[] cocoClasses = {"person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"};
     Button logout;
     TextView object1, object2;
     LinearLayout lin1, lin2;
     ImageButton voice1, voice2, vid1, vid2;
-    String video1, video2, item1, item2;
+    String video1, video2, item1="", item2="";
     TextToSpeech t1;
     String currentPhotoPath = "";
     private ObjectDetectorHelper objectDetectorHelper;
@@ -210,14 +210,18 @@ public class UserPage extends AppCompatActivity implements DetectorListener {
                     object1.setText(item1);
                     lin1.setVisibility(View.VISIBLE);
 
+                    t1.speak(item1, TextToSpeech.QUEUE_FLUSH, null);
+
                 } else if (res.size() == 2) {
                     item1 = res.get(0).getCategories().get(0).getLabel();
                     object1.setText(item1);
                     lin1.setVisibility(View.VISIBLE);
+                    t1.speak(item1, TextToSpeech.QUEUE_FLUSH, null);
                     item2 = res.get(1).getCategories().get(0).getLabel();
                     if(!item1.equals(item2)) {
                         object2.setText(item2);
                         lin2.setVisibility(View.VISIBLE);
+                        t1.speak(item2, TextToSpeech.QUEUE_FLUSH, null);
                     }else{
                         lin2.setVisibility(View.GONE);
                     }
